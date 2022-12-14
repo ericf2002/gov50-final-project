@@ -27,7 +27,18 @@ Our analyses cover percentage of low-income individuals and proximity to transit
 
 library (tidyverse) 
 library (modelsummary)
-
+library(kableExtra)
+library(broom)
+```
+```{r}
+options(
+  knitr.kable.NA = '',
+  width = 100)
+knitr::opts_chunk$set(
+  echo = FALSE,
+  message = FALSE,
+  warning = FALSE,
+  fig.align = "center")
 ```
 
 ```{r}
@@ -36,14 +47,21 @@ walkability_score <- read.csv ("EPA_SmartLocationDatabase_V3_Jan_2021_Final.csv"
 
 ```
 
+
+
 ```{r}
 walkability_score <- walkability_score |> 
-  mutate (`Proximity to Transportation Stop`= D4A)
+  mutate (`Proximity to Transportation Stop`= D4A,
+          `Percentage of Low Wage Workers` = R_PCTLOWWAGE,
+          `Population Density` = D1B,
+          `Auto-oriented Road Density` = D3AAO,
+            `Multi-Modal Road Density` = D3AMM,
+          `Pedestrian-Oriented Road Density` = D3APO)
   
 income_and_transportation_access <- walkability_score |>
   filter(`Proximity to Transportation Stop` >= 0) |>
   na.omit (`Proximity to Transportation Stop`) |>
-  mutate (`Proximity to Transportation Stop` = `Proximity to Transportation Stop` / 1609)
+  mutate (`Proximity to Transportation Stop` = `Proximity to Transportation Stop` / 1609) 
 
 
 ```
@@ -73,7 +91,7 @@ National Walkability Index also provides us with our explanatory variable: the p
 
 ```{r}
 income_level <- income_and_transportation_access |>
-  select (R_PCTLOWWAGE) |>
+  select (`Percentage of Low Wage Workers`) |>
   summary()
 
 income_level
@@ -81,7 +99,7 @@ income_level
 
 
 income_level_lineplot<- income_and_transportation_access |>
-  ggplot (mapping = aes (x= R_PCTLOWWAGE)) +
+  ggplot (mapping = aes (x= `Percentage of Low Wage Workers`)) +
   geom_histogram (bandwidth = 10,  color = "white") +
   labs(x = "Percent of Low Wage Workers Per Block Group",
         y = "Count",
@@ -99,59 +117,102 @@ Before regressing the proximity to a transportation stop on the percentage of lo
 
 
 ```{r}
-ggplot(data = income_and_transportation_access, mapping = aes(x = R_PCTLOWWAGE, y = `Proximity to Transportation Stop`)) + 
+ggplot(data = income_and_transportation_access, mapping = aes(x = `Percentage of Low Wage Workers`, y = `Proximity to Transportation Stop`)) + 
   geom_point(alpha = 0.2) +
-  geom_smooth (method = 'lm')
-
+  geom_smooth (method = 'lm',  se = FALSE, size = 1) +
+  labs (title = 
+  "Proximity of Public Transportation Stop by 
+   Percentage of Low Wage Workers per Block Group") +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  xlim(0, 1) 
 
 ```
-The bivariate scatter plot suggests that there exists a negative relationship between higher percentage of low wage workers in a block group, and the proximity to a public transportation stop. A regression analysis will help to provide a more detailed picture about this seemingly negative association.
+The bivariate scatter plot suggests that there exists a negative relationship between higher percentage of low wage workers in a block group, and the distance to a public transportation stop. A regression analysis will help to provide a more detailed picture about this seemingly negative association.
+  
+**Regression Results**
+
+Below you can find the results from two regression models. The first is a bivariate model, which regresses the proximity to a transportation stop on the percentage of low wage workers in a block group. The second is a multivariate model which includes block groun level covariates such as population density, the network density in terms of facility miles of auto-oriented links per square miles, network density in terms of facility miles of multi-modal links per square mile, and network density in terms of facility miles of pedestrian-oriented links per square mile
+
+The regression results form both models show that a statistically significant, negative correlation exists between the percentage of low wage workers per block group and proximity to a public transportation stop. 
+
+```{r}
+model_1 <- lm(
+  data = income_and_transportation_access, 
+  `Proximity to Transportation Stop` ~ `Percentage of Low Wage Workers`)
+
+model_2 <- lm(
+  data = income_and_transportation_access, 
+  `Proximity to Transportation Stop` ~ `Percentage of Low Wage Workers` + `Population Density` + `Auto-oriented Road Density` + `Multi-Modal Road Density` + `Pedestrian-Oriented Road Density`) 
 
 
+results <-
+  full_join(
+    model_1 |> 
+      broom::tidy() |> 
+      select(term, est1 = estimate, se1 = std.error, pval1 = p.value),
+    model_2 |> 
+      broom::tidy() |> 
+      select(term, est2 = estimate, se2 = std.error, pval2 = p.value)) |>
+  select(term, matches("est"), matches("se"), matches ("pval")) 
+
+
+results |>
+  knitr::kable(
+    booktabs = TRUE, digits = 4,
+    col.names = c("Coefficient", rep(c("Bivariate", "Multivariate"), 3))) |>
+  kable_styling(
+    position = "center", 
+    latex_options = "HOLD_position") |>
+   add_header_above( c(
+      " " = 1, 
+      "Coef. estimate" = 2, 
+      "Std. error" = 2, 
+      "P-value" = 2)) |>
+  column_spec(1, color = "black", background = "white")
+```
+
+The bivariate model suggests that on average, when the percentage of low wage workers in a block group is 0, the distance to a public transportation stop is .349 miles. The coefficient on the percentage of low-wage workers is -0.299, which means that when there is a one unit increase in the percentage of low-wage workers from a scale of 0 to 1, distance to a public transportation stop is predicted to be about .299 miles closer on average. 
+
+The multivariate model predicts a larger association. Holding population density, the network density in terms of facility miles of auto-oriented links per square miles, network density in terms of facility miles of multi-modal links per square mile, and network density in terms of facility miles of pedestrian-oriented links per square mile constant, a one unit increase in the proportion of low wage workers is associated with a decrease in proximity to a public transportation stop by .362 miles.  
+
+**Statistical Significance**
+
+
+The association between the proximity to public transportation and the percentage of low wage workers per block group is statistically significant at the test level α = 0.05 in both the bivariate amd multivariate models. In both models, the p-value on the coefficient is 0. Since the p-value is 0, we would reject the null hypothesis that there is no association between the proximity to public transportation and the percentage of low wage workers per block group. In other words, the hypothesis that the association between the proximity to public transportation and the percentage of low wage workers per block group was non-zero, then the coefficient's p-value of 0 would suggest that there is a near 100% probability that the estimated association, in this case a negative association, is not due to random chance. 
 
 
 
 ```{r}
-fit_1 <- lm(`Proximity to Transportation Stop` ~ R_PCTLOWWAGE, data = income_and_transportation_access)
+#Coefficient estimates
+coefest_model_1 <- summary(model_1)$coefficients["`Percentage of Low Wage Workers`", "Estimate"]
+coefest_model_2 <- summary(model_2)$coefficients ["`Percentage of Low Wage Workers`", "Estimate"]
+#Standard errors
+coefse_model_1 <- summary(model_1)$coefficients ["`Percentage of Low Wage Workers`", "Std. Error"]
+coefse_model_2 <- summary(model_2)$coefficients["`Percentage of Low Wage Workers`", "Std. Error"]
+#Probabilistic onfidence intervals
+ci95_model_1 <- c(
+  coefest_model_1 -1.96*coefse_model_1,
+  coefest_model_1 + 1.96*coefse_model_1)
+ci95_model_2 <- c(
+  coefest_model_2 - 1.96*coefse_model_2,
+  coefest_model_2 + 1.96*coefse_model_2)
 
-fit_1 |>
-  broom::tidy() |>
-  select(term, estimate) |>
-  knitr::kable(digits = 2,
-               col.names = c("Term", "Estimate"))
+ci95_model_1
 
-modelsummary::modelsummary(fit_1,
-                           statistic = c("s.e. = {std.error}",
-                                         "p = {p.value}"),
-                           gof_map = c("nobs", "r.squared", "adj.r.squared"))
+ci95_model_2
 ```
 
+Assuming the sampling distribution of the proximity to public transportation is approximately normal, the standard error on the coefficient estimates for the percentage of low wage workers per block group cna be used to construct a probabilistic 95% confidence interval. Since 1.96 represents the z-score that captures 95% of the data underneath a standard normal distirbution, that value can be multiplied by the coefficient standard error, and this product subtracted and added to the coefficient point estimate, to produce lower and upper bound limits of the 95% confidence interval.
 
+The 95% confidence interval for ideal point preferences under the bivariate model can be formally described as
 
+$$
+\beta_{\text{`Percentage of Low Wage Workers`}} =-0.2993	 \in  (-0.318,\,-0.279)
+$$
+and under the multivariate model as
 
-The value of the intercept tells us that when there is a 0% low wage workers, the average proximity to a public transportation stop is .35 miles. The -0.3 proximity estimate tells us that there is a negative relationship between the percentage of low wage workers in a  block group and the proximity to a public transportation stop in miles. This means that on average, an increase in the percentage of low wage workers predicts a decrease in proximity of public transportation by .3 miles.The bivariate scatter plot alspo suggests that there exists a negative relationship between higher percentage of low wage workers in a block group, and the proximity to a public transportation stop. A regression analysis will help to provide a more detailed picture about this seemingly negative association. 
+$$
+\beta_{\text{`Percentage of Low Wage Workers`}} =-0.3616		 \in  (-0.379,\,-0.343)
+$$
 
-
-
-```{r}
-fit_1 <- lm(`Proximity to Transportation Stop` ~ R_PCTLOWWAGE, data = income_and_transportation_access)
-
-fit_1 |>
-  broom::tidy() |>
-  select(term, estimate) |>
-  knitr::kable(digits = 2,
-               col.names = c("Term", "Estimate"))
-```
-
-```{r}
-fit_1 <- lm(`Proximity to Transportation Stop` ~ R_PCTLOWWAGE, data = income_and_transportation_access)
-
-
-
-modelsummary::modelsummary(fit_1,
-                           statistic = c("s.e. = {std.error}",
-                                         "p = {p.value}"),
-                           gof_map = c("nobs", "r.squared", "adj.r.squared"))
-```
-
-
+This means that across repeated samples, 95% of regression estimated correlations between the proximity to public transportation and the percentage of low wage workers per block group would be within the bounds above. 
