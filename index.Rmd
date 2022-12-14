@@ -1,7 +1,7 @@
 ---
-title: "Gov 50 Final Project"
-author: "Your Name Here"
-description: "My final project"
+title: "Income Level and Access to Public Transportation"
+author: Eric Forteza
+description: How does income level affect access to public transportation in the United States?
 output:
   distill::distill_article:
     self_contained: false
@@ -9,6 +9,149 @@ output:
 
 
 
-## Project thoughts
 
-I am interested in exploring data related to...
+## Introduction
+
+Does a person's income level affect their access to public transportation? In this study, I plan to examine the extent to which income level influences how much access people have to public transportation. I hypothesize that people with higher incomes will people with higher incomes will have more access to public transportation infrastructure than those with lower incomes. Often, higher incomes allow local government to invest in public infrastructure, like transportation, through taxation. However, it is also often true that people with higher incomes tend to live in more suburban areas, which have less public transportation. This project seeks to offer more clarity to this puzzle by exploring how wealth in the US relates to access to public transportation. Specifically: our project asks whether the income level of a block group in the US influences its proximity to a public transportation stop. If I observe that block groups with higher percentages of low wage workers have less proximity to public transportation stops, this would support my hypothesis. However, if I observe that block groups with lower percentages of low wage workers have more proximity or a similar proximity to public transportation stops, this would provide eveidence against my hypothesis. In addition, this project will look at potential confounders variable like density, frequency of public transportation during peak hours, and racial diversity to have a more clear understanding of this relationship. 
+
+## Data and Research Design
+
+
+To investigate this relationship, I am relying on data from the following source:
+
+United States Environmental Protection Agency's National Walkability Index (2021). This nationwide geographic data source ranks block groups according to their relative walkability. This data set includes the block groups' walkability scores as well as underlying attributes that are used to rank them, including the income levels of block groups, the percentage of low-income individuals per block, proximity to transit, etc. 
+
+Our analyses cover percentage of low-income individuals and proximity to transit stop in meters for 84,912 unique block groups from the 2019 US Census. My research design is observational, correlational analysis, and makes no casual assumptions or claims. 
+
+```{r}
+
+library (tidyverse) 
+library (modelsummary)
+
+```
+
+```{r}
+library (tidyverse)
+walkability_score <- read.csv ("EPA_SmartLocationDatabase_V3_Jan_2021_Final.csv")
+
+```
+
+```{r}
+walkability_score <- walkability_score |> 
+  mutate (`Proximity to Transportation Stop`= D4A)
+  
+income_and_transportation_access <- walkability_score |>
+  filter(`Proximity to Transportation Stop` >= 0) |>
+  na.omit (`Proximity to Transportation Stop`) |>
+  mutate (`Proximity to Transportation Stop` = `Proximity to Transportation Stop` / 1609)
+
+
+```
+
+National Walkability Index provides us with our outcome variable: the proximity of a block-group to a public transportation stop in miles. This was originally measured in meters from population-weighted centroid of block group to nearest transit stop; however, I have changed the scale from meters to miles. The outcome ranges from 0 miles to .75 miles, with a median of 0.2451 and a mean of 0.2791. 
+
+
+```{r}
+transit_prox <- income_and_transportation_access |>
+  select (`Proximity to Transportation Stop`) |>
+  summary()
+
+transit_prox
+
+transit_prox_lineplot<- income_and_transportation_access |>
+  ggplot (mapping = aes (x= `Proximity to Transportation Stop`)) +
+  geom_histogram ( color = "white") +
+  labs(x = "Proximity to a Transportation Stop from Home in Miles",
+        y = "Count",
+        title = "Distribution of Proximity to a Transportation Stop from Home") 
+
+transit_prox_lineplot
+```
+
+
+National Walkability Index also provides us with our explanatory variable: the percent of low wage workers in a block-group based on home location, with low wage workes being defined as workers who make $1250 per month or less. This data set classifies medium wage workers as those making more than $1250 but less than $3333 and high wage works as those making more than $3333. This variable has a median of 0.226, and a mean of 0.232.
+
+```{r}
+income_level <- income_and_transportation_access |>
+  select (R_PCTLOWWAGE) |>
+  summary()
+
+income_level
+
+
+
+income_level_lineplot<- income_and_transportation_access |>
+  ggplot (mapping = aes (x= R_PCTLOWWAGE)) +
+  geom_histogram (bandwidth = 10,  color = "white") +
+  labs(x = "Percent of Low Wage Workers Per Block Group",
+        y = "Count",
+        title = "Distribution of Percent of Low Wage Workers Per Block Group") 
+
+income_level_lineplot
+```
+
+## Results
+
+
+Before regressing the proximity to a transportation stop on the percentage of low wage workers in a block group, the bivarate relationship between these variables can be visualized with a scatter plot. The scatter plot graph below plots the point percentage of low wage workers per block group on the x-axis, and the prxomitiy in miles to a public transportation stop.
+
+
+
+
+```{r}
+ggplot(data = income_and_transportation_access, mapping = aes(x = R_PCTLOWWAGE, y = `Proximity to Transportation Stop`)) + 
+  geom_point(alpha = 0.2) +
+  geom_smooth (method = 'lm')
+
+
+```
+The bivariate scatter plot suggests that there exists a negative relationship between higher percentage of low wage workers in a block group, and the proximity to a public transportation stop. A regression analysis will help to provide a more detailed picture about this seemingly negative association.
+
+
+
+
+
+```{r}
+fit_1 <- lm(`Proximity to Transportation Stop` ~ R_PCTLOWWAGE, data = income_and_transportation_access)
+
+fit_1 |>
+  broom::tidy() |>
+  select(term, estimate) |>
+  knitr::kable(digits = 2,
+               col.names = c("Term", "Estimate"))
+
+modelsummary::modelsummary(fit_1,
+                           statistic = c("s.e. = {std.error}",
+                                         "p = {p.value}"),
+                           gof_map = c("nobs", "r.squared", "adj.r.squared"))
+```
+
+
+
+
+The value of the intercept tells us that when there is a 0% low wage workers, the average proximity to a public transportation stop is .35 miles. The -0.3 proximity estimate tells us that there is a negative relationship between the percentage of low wage workers in a  block group and the proximity to a public transportation stop in miles. This means that on average, an increase in the percentage of low wage workers predicts a decrease in proximity of public transportation by .3 miles.The bivariate scatter plot alspo suggests that there exists a negative relationship between higher percentage of low wage workers in a block group, and the proximity to a public transportation stop. A regression analysis will help to provide a more detailed picture about this seemingly negative association. 
+
+
+
+```{r}
+fit_1 <- lm(`Proximity to Transportation Stop` ~ R_PCTLOWWAGE, data = income_and_transportation_access)
+
+fit_1 |>
+  broom::tidy() |>
+  select(term, estimate) |>
+  knitr::kable(digits = 2,
+               col.names = c("Term", "Estimate"))
+```
+
+```{r}
+fit_1 <- lm(`Proximity to Transportation Stop` ~ R_PCTLOWWAGE, data = income_and_transportation_access)
+
+
+
+modelsummary::modelsummary(fit_1,
+                           statistic = c("s.e. = {std.error}",
+                                         "p = {p.value}"),
+                           gof_map = c("nobs", "r.squared", "adj.r.squared"))
+```
+
+
