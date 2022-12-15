@@ -12,19 +12,17 @@ output:
 
 ## Introduction
 
-Does a person's income level affect their access to public transportation? In this study, I plan to examine the extent to which income level influences how much access people have to public transportation. I hypothesize that people with higher incomes will have more access to public transportation infrastructure than those with lower incomes. Often, higher incomes allow local government to invest in public infrastructure, like transportation, through taxation. Additionally, many urban areas with more developed public transportation infrastructure are often very expensive to live in, such as New York City, Chicago, Boston, etc. However, it is also often true that people with higher incomes tend to live in more suburban areas, which have less public transportation. This project seeks to offer more clarity to this puzzle by exploring how wealth in the US relates to access to public transportation. Specifically: our project asks whether the income level of a block group in the US influences its proximity to a public transportation stop. If I observe that block groups with higher percentages of low wage workers have less proximity to public transportation stops, this would support my hypothesis. However, if I observe that block groups with lower percentages of low wage workers have more proximity or a similar proximity to public transportation stops, this would provide eveidence against my hypothesis. In addition, this project will look at potential confounders variable like density, frequency of public transportation during peak hours, and racial diversity to have a more clear understanding of this relationship. 
+Does a person's income level affect their access to public transportation? In this study, I plan to examine the extent to which income level influences how much access people have to public transportation. I hypothesize that people with higher incomes will have more access to public transportation infrastructure than those with lower incomes. Often, higher incomes allow local government to invest in public infrastructure, like transportation, through taxation. Additionally, many urban areas with more developed public transportation infrastructure are often very expensive to live in, such as New York City, Chicago, Boston, etc. However, it is also often true that people with higher incomes tend to live in more suburban areas, which have less public transportation. This project seeks to offer more clarity to this puzzle by exploring how wealth in the US relates to access to public transportation. Specifically: our project asks whether the income level of a block group in the US influences its proximity to a public transportation stop. If I observe that block groups with higher percentages of low wage workers are further away from public transportation stops, this would support my hypothesis. However, if I observe that block groups with higher percentages of low wage workers are actually closer to public transportation stops, this would provide evidence against my hypothesis. 
 
 ## Data and Research Design
 
-
-To investigate this relationship, I am relying on data from the following source:
+This project is relying on the following data source to investigate this relationship:
 
 United States Environmental Protection Agency's National Walkability Index (2021). This nationwide geographic data source ranks block groups according to their relative walkability. This data set includes the block groups' walkability scores as well as underlying attributes that are used to rank them, including the income levels of block groups, the percentage of low-income individuals per block, proximity to transit, etc. 
 
-Our analyses cover percentage of low-income individuals and proximity to transit stop in meters for 84,912 unique block groups from the 2019 US Census. My research design is observational, correlational analysis, and makes no casual assumptions or claims. 
+This analyses covers percentage of low-income individuals and proximity to transit stop in meters for 84,912 unique block groups from the 2019 US Census. My research design is observational, correlational analysis, and makes no casual assumptions or claims. 
 
 ```{r}
-
 library (tidyverse) 
 library (modelsummary)
 library(kableExtra)
@@ -66,7 +64,7 @@ income_and_transportation_access <- walkability_score |>
 
 ```
 
-National Walkability Index provides us with our outcome variable: the proximity of a block-group to a public transportation stop in miles. This was originally measured in meters from population-weighted centroid of block group to nearest transit stop; however, I have changed the scale from meters to miles. The outcome ranges from 0 miles to .75 miles, with a median of 0.2451 and a mean of 0.2791. 
+National Walkability Index provides us with our outcome variable: the proximity of a block-group to a public transportation stop in miles. This was originally measured in meters from population-weighted centroid of block group to nearest transit stop; however, I have changed the scale from meters to miles to create a 0 to 1 scale that would be simpler to analyze. The outcome ranges from 0 miles to .75 miles, with a median of 0.2451 and a mean of 0.2791 miles. 
 
 
 ```{r}
@@ -87,7 +85,7 @@ transit_prox_lineplot
 ```
 
 
-National Walkability Index also provides us with our explanatory variable: the percent of low wage workers in a block-group based on home location, with low wage workes being defined as workers who make $1250 per month or less. This data set classifies medium wage workers as those making more than $1250 but less than $3333 and high wage works as those making more than $3333. This variable has a median of 0.226, and a mean of 0.232.
+National Walkability Index also provides us with our explanatory variable: the percent of low wage workers in a block-group based on home location, with low wage workers being defined as workers who make $1250 per month or less. This data set classifies medium wage workers as those making more than $1250 but less than $3333 and high wage works as those making more than $3333. This variable has a median of 0.226, and a mean of 0.232.
 
 ```{r}
 income_level <- income_and_transportation_access |>
@@ -110,11 +108,7 @@ income_level_lineplot
 
 ## Results
 
-
-Before regressing the proximity to a transportation stop on the percentage of low wage workers in a block group, the bivarate relationship between these variables can be visualized with a scatter plot. The scatter plot graph below plots the point percentage of low wage workers per block group on the x-axis, and the prxomitiy in miles to a public transportation stop.
-
-
-
+Prior to performing a regression of the proximity to a transportation stop on the percentage of low wage workers in a block group, a scatter plot can visualize the bivariate relationship between these two variables. The scatter plot graph below plots the point percentage of low wage workers per block group on the x-axis, and the proximity in miles to a public transportation stop.
 
 ```{r}
 ggplot(data = income_and_transportation_access, mapping = aes(x = `Percentage of Low Wage Workers`, y = `Proximity to Transportation Stop`)) + 
@@ -131,7 +125,7 @@ The bivariate scatter plot suggests that there exists a negative relationship be
   
 **Regression Results**
 
-Below you can find the results from two regression models. The first is a bivariate model, which regresses the proximity to a transportation stop on the percentage of low wage workers in a block group. The second is a multivariate model which includes block group level covariates such as population density, the network density in terms of facility miles of auto-oriented links per square miles, network density in terms of facility miles of multi-modal links per square mile, and network density in terms of facility miles of pedestrian-oriented links per square mile
+Below   can find the results from two regression models. The first is a bivariate model, which regresses the proximity to a transportation stop on the percentage of low wage workers in a block group. The second is a multivariate model which includes block group level covariates such as population density, the network density in terms of facility miles of auto-oriented links per square miles, network density in terms of facility miles of multi-modal links per square mile, and network density in terms of facility miles of pedestrian-oriented links per square mile
 
 The regression results form both models show that a statistically significant, negative correlation exists between the percentage of low wage workers per block group and proximity to a public transportation stop. 
 
