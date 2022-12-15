@@ -6,10 +6,6 @@ output:
   distill::distill_article:
     self_contained: false
 ---
-
-
-
-
 ## Introduction
 
 Does a person's income level affect their access to public transportation? In this study, I plan to examine the extent to which income level influences how much access people have to public transportation. I hypothesize that people with higher incomes will have more access to public transportation infrastructure than those with lower incomes. Often, higher incomes allow local government to invest in public infrastructure, like transportation, through taxation. Additionally, many urban areas with more developed public transportation infrastructure are often very expensive to live in, such as New York City, Chicago, Boston, etc. However, it is also often true that people with higher incomes tend to live in more suburban areas, which have less public transportation. This project seeks to offer more clarity to this puzzle by exploring how wealth in the US relates to access to public transportation. Specifically: our project asks whether the income level of a block group in the US influences its proximity to a public transportation stop. If I observe that block groups with higher percentages of low wage workers are further away from public transportation stops, this would support my hypothesis. However, if I observe that block groups with higher percentages of low wage workers are actually closer to public transportation stops, this would provide evidence against my hypothesis. 
@@ -46,8 +42,6 @@ walkability_score <- read.csv ("EPA_SmartLocationDatabase_V3_Jan_2021_Final.csv"
 
 ```
 
-
-
 ```{r}
 walkability_score <- walkability_score |> 
   mutate (`Proximity to Transportation Stop`= D4A,
@@ -66,20 +60,20 @@ income_and_transportation_access <- walkability_score |>
 National Walkability Index provides us with our outcome variable: the proximity of a block-group to a public transportation stop in miles. This was originally measured in meters from population-weighted centroid of block group to nearest transit stop; however, I have changed the scale from meters to miles to create a 0 to 1 scale that would be simpler to analyze. The outcome ranges from 0 miles to .75 miles, with a median of 0.2451 and a mean of 0.2791 miles. 
 
 ```{r}
-transit_prox <- income_and_transportation_access |>
+transit_proximity <- income_and_transportation_access |>
   select (`Proximity to Transportation Stop`) |>
   summary()
 
-transit_prox
+transit_proximity
 
-transit_prox_lineplot<- income_and_transportation_access |>
+transit_prox_plot<- income_and_transportation_access |>
   ggplot (mapping = aes (x= `Proximity to Transportation Stop`)) +
   geom_histogram (color = "white") +
   labs(x = "Proximity to a Transportation Stop from Home in Miles",
         y = "Count",
         title = "Distribution of Proximity to a Transportation Stop from Home") 
 
-transit_prox_lineplot
+transit_prox_plot
 ```
 
 National Walkability Index also provides us with our explanatory variable: the percent of low wage workers in a block-group based on home location, with low wage workers being defined as workers who make $1250 per month or less. This data set classifies medium wage workers as those making more than $1250 but less than $3333 and high wage works as those making more than $3333. This variable has a median of 0.226, and a mean of 0.232.
