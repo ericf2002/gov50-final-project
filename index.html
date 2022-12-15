@@ -1526,24 +1526,10 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <p>United States Environmental Protection Agency’s National Walkability Index (2021). This nationwide geographic data source ranks block groups according to their relative walkability. This data set includes the block groups’ walkability scores as well as underlying attributes that are used to rank them, including the income levels of block groups, the percentage of low-income individuals per block, proximity to transit, etc.</p>
 <p>This analyses covers percentage of low-income individuals and proximity to transit stop in meters for 84,912 unique block groups from the 2019 US Census. My research design is observational, correlational analysis, and makes no casual assumptions or claims.</p>
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span> <span class='op'>(</span><span class='va'><a href='https://tidyverse.tidyverse.org'>tidyverse</a></span><span class='op'>)</span> </span>
-<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span> <span class='op'>(</span><span class='va'><a href='https://vincentarelbundock.github.io/modelsummary/'>modelsummary</a></span><span class='op'>)</span></span>
-<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='http://haozhu233.github.io/kableExtra/'>kableExtra</a></span><span class='op'>)</span></span>
-<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://broom.tidymodels.org/'>broom</a></span><span class='op'>)</span></span></code></pre>
-</div>
+
 </div>
 <div class="layout-chunk" data-layout="l-body">
-<div class="sourceCode">
-<pre class="sourceCode r"><code class="sourceCode r"><span><span class='fu'><a href='https://rdrr.io/r/base/options.html'>options</a></span><span class='op'>(</span></span>
-<span>  knitr.kable.NA <span class='op'>=</span> <span class='st'>''</span>,</span>
-<span>  width <span class='op'>=</span> <span class='fl'>100</span><span class='op'>)</span></span>
-<span><span class='fu'>knitr</span><span class='fu'>::</span><span class='va'><a href='https://rdrr.io/pkg/knitr/man/opts_chunk.html'>opts_chunk</a></span><span class='op'>$</span><span class='fu'>set</span><span class='op'>(</span></span>
-<span>  echo <span class='op'>=</span> <span class='cn'>FALSE</span>,</span>
-<span>  message <span class='op'>=</span> <span class='cn'>FALSE</span>,</span>
-<span>  warning <span class='op'>=</span> <span class='cn'>FALSE</span>,</span>
-<span>  fig.align <span class='op'>=</span> <span class='st'>"center"</span><span class='op'>)</span></span></code></pre>
-</div>
+
 </div>
 <div class="layout-chunk" data-layout="l-body">
 

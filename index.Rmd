@@ -18,14 +18,14 @@ United States Environmental Protection Agency's National Walkability Index (2021
 
 This analyses covers percentage of low-income individuals and proximity to transit stop in meters for 84,912 unique block groups from the 2019 US Census. My research design is observational, correlational analysis, and makes no casual assumptions or claims. 
 
-```{r}
+```{r, echo =  FALSE}
 library (tidyverse) 
 library (modelsummary)
 library(kableExtra)
 library(broom)
 ```
 
-```{r}
+```{r, , echo =  FALSE}
 options(
   knitr.kable.NA = '',
   width = 100)
@@ -36,13 +36,13 @@ knitr::opts_chunk$set(
   fig.align = "center")
 ```
 
-```{r}
+```{r, echo =  FALSE}
 library (tidyverse)
 walkability_score <- read.csv ("EPA_SmartLocationDatabase_V3_Jan_2021_Final.csv")
 
 ```
 
-```{r}
+```{r, echo =  FALSE}
 walkability_score <- walkability_score |> 
   mutate (`Proximity to Transportation Stop`= D4A,
           `Percentage of Low Wage Workers` = R_PCTLOWWAGE,
@@ -59,7 +59,7 @@ income_and_transportation_access <- walkability_score |>
 
 National Walkability Index provides us with our outcome variable: the proximity of a block-group to a public transportation stop in miles. This was originally measured in meters from population-weighted centroid of block group to nearest transit stop; however, I have changed the scale from meters to miles to create a 0 to 1 scale that would be simpler to analyze. The outcome ranges from 0 miles to .75 miles, with a median of 0.2451 and a mean of 0.2791 miles. 
 
-```{r}
+```{r, echo = FALSE}
 transit_proximity <- income_and_transportation_access |>
   select (`Proximity to Transportation Stop`) |>
   summary()
@@ -79,7 +79,7 @@ transit_prox_plot
 National Walkability Index also provides us with our explanatory variable: the percent of low wage workers in a block-group based on home location, with low wage workers being defined as workers who make $1250 per month or less. This data set classifies medium wage workers as those making more than $1250 but less than $3333 and high wage works as those making more than $3333. This variable has a median of 0.226, and a mean of 0.232.
 
 
-```{r}
+```{r, echo =  FALSE}
 income_level <- income_and_transportation_access |>
   select (`Percentage of Low Wage Workers`) |>
   summary()
@@ -100,9 +100,9 @@ income_level_lineplot
 
 Prior to performing a regression of the proximity to a transportation stop on the percentage of low wage workers in a block group, a scatter plot can visualize the bivariate relationship between these two variables. The scatter plot graph below plots the point percentage of low wage workers per block group on the x-axis, and the proximity in miles to a public transportation stop.
 
-```{r}
+```{r, echo =  FALSE}
 ggplot(data = income_and_transportation_access, mapping = aes(x = `Percentage of Low Wage Workers`, y = `Proximity to Transportation Stop`)) + 
-  geom_point(alpha = 0.2) +
+  geom_point(alpha = 0.1) +
   geom_smooth (method = 'lm',  se = FALSE, size = 1) +
   labs (title = 
   "Proximity of Public Transportation Stop by 
@@ -117,7 +117,7 @@ Below   can find the results from two regression models. The first is a bivariat
 
 The regression results form both models show that a statistically significant, negative correlation exists between the percentage of low wage workers per block group and proximity to a public transportation stop. 
 
-```{r}
+```{r, echo =  FALSE}
 model_1 <- lm(
   data = income_and_transportation_access, 
   `Proximity to Transportation Stop` ~ `Percentage of Low Wage Workers`)
@@ -164,14 +164,14 @@ The association between the proximity to public transportation and the percentag
 
 
 
-```{r}
-#Coefficient estimates
+```{r, echo =  FALSE}
+
 coefest_model_1 <- summary(model_1)$coefficients["`Percentage of Low Wage Workers`", "Estimate"]
 coefest_model_2 <- summary(model_2)$coefficients ["`Percentage of Low Wage Workers`", "Estimate"]
-#Standard errors
+
 coefse_model_1 <- summary(model_1)$coefficients ["`Percentage of Low Wage Workers`", "Std. Error"]
 coefse_model_2 <- summary(model_2)$coefficients["`Percentage of Low Wage Workers`", "Std. Error"]
-#Probabilistic onfidence intervals
+
 ci95_model_1 <- c(
   coefest_model_1 -1.96*coefse_model_1,
   coefest_model_1 + 1.96*coefse_model_1)
