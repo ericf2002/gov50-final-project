@@ -76,7 +76,7 @@ transit_prox
 
 transit_prox_lineplot<- income_and_transportation_access |>
   ggplot (mapping = aes (x= `Proximity to Transportation Stop`)) +
-  geom_histogram ( color = "white") +
+  geom_histogram (color = "white") +
   labs(x = "Proximity to a Transportation Stop from Home in Miles",
         y = "Count",
         title = "Distribution of Proximity to a Transportation Stop from Home") 
