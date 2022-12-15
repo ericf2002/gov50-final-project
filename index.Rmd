@@ -28,6 +28,7 @@ library (modelsummary)
 library(kableExtra)
 library(broom)
 ```
+
 ```{r}
 options(
   knitr.kable.NA = '',
@@ -60,12 +61,9 @@ income_and_transportation_access <- walkability_score |>
   filter(`Proximity to Transportation Stop` >= 0) |>
   na.omit (`Proximity to Transportation Stop`) |>
   mutate (`Proximity to Transportation Stop` = `Proximity to Transportation Stop` / 1609) 
-
-
 ```
 
 National Walkability Index provides us with our outcome variable: the proximity of a block-group to a public transportation stop in miles. This was originally measured in meters from population-weighted centroid of block group to nearest transit stop; however, I have changed the scale from meters to miles to create a 0 to 1 scale that would be simpler to analyze. The outcome ranges from 0 miles to .75 miles, with a median of 0.2451 and a mean of 0.2791 miles. 
-
 
 ```{r}
 transit_prox <- income_and_transportation_access |>
@@ -84,8 +82,8 @@ transit_prox_lineplot<- income_and_transportation_access |>
 transit_prox_lineplot
 ```
 
-
 National Walkability Index also provides us with our explanatory variable: the percent of low wage workers in a block-group based on home location, with low wage workers being defined as workers who make $1250 per month or less. This data set classifies medium wage workers as those making more than $1250 but less than $3333 and high wage works as those making more than $3333. This variable has a median of 0.226, and a mean of 0.232.
+
 
 ```{r}
 income_level <- income_and_transportation_access |>
@@ -93,8 +91,6 @@ income_level <- income_and_transportation_access |>
   summary()
 
 income_level
-
-
 
 income_level_lineplot<- income_and_transportation_access |>
   ggplot (mapping = aes (x= `Percentage of Low Wage Workers`)) +
@@ -118,7 +114,6 @@ ggplot(data = income_and_transportation_access, mapping = aes(x = `Percentage of
   "Proximity of Public Transportation Stop by 
    Percentage of Low Wage Workers per Block Group") +
   theme(plot.title = element_text(hjust = 0.5)) 
-
 ```
 The bivariate scatter plot suggests that there exists a negative relationship between higher percentage of low wage workers in a block group, and the distance to a public transportation stop. A regression analysis will help to provide a more detailed picture about this seemingly negative association.
   
