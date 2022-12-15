@@ -117,8 +117,7 @@ ggplot(data = income_and_transportation_access, mapping = aes(x = `Percentage of
   labs (title = 
   "Proximity of Public Transportation Stop by 
    Percentage of Low Wage Workers per Block Group") +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  xlim(0, 1) 
+  theme(plot.title = element_text(hjust = 0.5)) 
 
 ```
 The bivariate scatter plot suggests that there exists a negative relationship between higher percentage of low wage workers in a block group, and the distance to a public transportation stop. A regression analysis will help to provide a more detailed picture about this seemingly negative association.
